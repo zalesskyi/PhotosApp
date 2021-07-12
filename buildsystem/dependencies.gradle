@@ -1,0 +1,189 @@
+//Android
+ext {
+    androidMinSdkVersion = 21
+    androidTargetSdkVersion = 30
+    androidCompileSdkVersion = 30
+    androidBuildToolsVersion = "29.0.3"
+}
+
+//Libraries
+ext {
+
+    androidGradlePluginVersion = '4.1.0'
+
+    coroutinesVer = '1.3.9'
+
+    // Android X
+    androidxVersion = '1.1.0'
+    constraintlayoutVersion = '2.0.0-beta4'
+    navVersion = '2.3.0'
+    coilVersion = '0.12.0'
+
+    // Support
+    supportLibraryVersion = '29.0.3'
+
+    // Dagger
+    daggerVersion = '2.24'
+    rxJavaVersion = '2.2.8'
+    rxAndroidVersion = '2.1.1'
+    rxKotlinVersion = '2.4.0'
+
+    // Retrofit
+    retrofitVersion = '2.7.2'
+    okhttp3Version = '3.12.1'
+
+    //Java
+    javaxAnnotationVersion = '1.0'
+    javaxInjectVersion = '1'
+
+    // Kotlin
+    kotlinVersion = '1.3.72'
+    ktxVersion = '1.3.0'
+    coroutinesVersion = '1.3.1'
+
+    //corbind
+    corbindVersion = '1.2.0'
+
+    //Development
+    leakCanaryVersion = '1.6.2'
+
+    //JodaTime
+    jodaTimeVersion = '2.9.9.4'
+
+    // Logs + Crash Reporting
+    timberVersion = '4.7.0'
+    crashlyticsVersion = '2.10.1@aar'
+
+    // Material dialogs
+    dialogsVersion = '3.3.0'
+
+    okHttpProfilerVersion = '1.0.5'
+
+    roomVersion = "2.3.0"
+}
+
+
+def dependencyGroup(Closure closure) {
+    closure.delegate = dependencies
+    return closure
+}
+
+//Global
+static def addRepos(RepositoryHandler handler) {
+    handler.google()
+    handler.jcenter()
+
+    handler.maven { url "https://jitpack.io" }
+    handler.maven { url 'https://maven.fabric.io/public' }
+    handler.maven {
+        url 'https://github.com/WickeDev/stetho-realm/raw/master/maven-repo'
+    }
+}
+
+ext.addRepos = this.&addRepos
+ext.deps = [:]
+def deps = [:]
+
+deps.gradlePlugin = "com.android.tools.build:gradle:$androidGradlePluginVersion"
+deps.kotlinPlugin = "org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlinVersion"
+deps.realmPlugin = "io.realm:realm-gradle-plugin:5.7.0"
+deps.navigationPlugin = "androidx.navigation:navigation-safe-args-gradle-plugin:$navVersion"
+deps.daggerHilt = 'com.google.dagger:hilt-android-gradle-plugin:2.37'
+deps.firebase = 'com.google.firebase:firebase-appdistribution-gradle:2.0.0'
+deps.crashlytics = 'com.google.firebase:firebase-crashlytics-gradle:2.2.0'
+deps.googleServices = 'com.google.gms:google-services:4.3.3'
+deps.fabricGradle = 'io.fabric.tools:gradle:1.31.2' // Google hasn't got rid of this Fabric dependency for Firebase Crashlytic
+
+ext.deps = deps
+
+/******* Modules Dependencies *******/
+
+ext.presentationDependencies = dependencyGroup {
+    implementation fileTree(dir: 'libs', include: ['*.jar'])
+
+    implementation project(':domain')
+    implementation project(':data')
+
+    ui()
+    coroutines()
+    navigation()
+    dagger()
+    retrofit()
+    db()
+    debugTools()
+    kotlinSdk()
+}
+
+ext.domainDependencies = dependencyGroup {
+    implementation fileTree(dir: 'libs', include: ['*.jar'])
+    kotlinSdk()
+    coroutines()
+    dagger()
+    retrofit()
+}
+
+ext.dataDependencies = dependencyGroup {
+    implementation fileTree(dir: 'libs', include: ['*.jar'])
+    implementation project(':domain')
+
+    kotlinSdk()
+    coroutines()
+    dagger()
+    retrofit()
+    db()
+}
+
+ext.kotlinSdk = dependencyGroup {
+    implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk8:${kotlinVersion}"
+    implementation "androidx.core:core-ktx:${ktxVersion}"
+}
+
+ext.debugTools = dependencyGroup {
+    implementation "com.squareup.leakcanary:leakcanary-android:${leakCanaryVersion}"
+}
+
+ext.db = dependencyGroup {
+    implementation("androidx.room:room-runtime:$roomVersion")
+    kapt("androidx.room:room-compiler:$roomVersion")
+    implementation("androidx.room:room-ktx:$roomVersion")
+}
+
+ext.ui = dependencyGroup {
+    implementation "com.google.android.material:material:1.2.0-beta01"
+    implementation "androidx.constraintlayout:constraintlayout:2.0.0-beta4"
+    implementation "androidx.appcompat:appcompat:${androidxVersion}"
+    implementation "androidx.core:core-ktx:${ktxVersion}"
+    implementation 'androidx.lifecycle:lifecycle-extensions:2.2.0'
+    implementation 'androidx.lifecycle:lifecycle-viewmodel-ktx:2.2.0'
+    kapt "androidx.lifecycle:lifecycle-compiler:2.2.0"
+    implementation "io.coil-kt:coil:$coilVersion"
+    implementation "com.facebook.shimmer:shimmer:0.5.0"
+    implementation 'com.github.nitrico.lastadapter:lastadapter:2.3.0'
+    implementation 'com.airbnb.android:lottie:3.4.4'
+}
+
+ext.coroutines = dependencyGroup {
+    implementation "org.jetbrains.kotlinx:kotlinx-coroutines-core:$coroutinesVersion"
+    implementation "org.jetbrains.kotlinx:kotlinx-coroutines-android:$coroutinesVersion"
+}
+
+ext.retrofit = dependencyGroup {
+    implementation "com.squareup.retrofit2:retrofit:${retrofitVersion}"
+    implementation "com.squareup.retrofit2:converter-gson:${retrofitVersion}"
+    implementation "com.squareup.okhttp3:logging-interceptor:${okhttp3Version}"
+    implementation "com.squareup.okhttp3:okhttp:${okhttp3Version}"
+    implementation 'com.localebro:okhttpprofiler:1.0.8'
+
+    implementation "org.jetbrains.kotlinx:kotlinx-coroutines-core:${coroutinesVer}"
+}
+
+ext.dagger = dependencyGroup {
+    implementation 'com.google.dagger:hilt-android:2.37'
+    annotationProcessor 'com.google.dagger:hilt-compiler:2.37'
+    kapt 'com.google.dagger:hilt-compiler:2.37'
+}
+
+ext.navigation = dependencyGroup {
+    implementation "androidx.navigation:navigation-fragment-ktx:$navVersion"
+    implementation "androidx.navigation:navigation-ui-ktx:$navVersion"
+}
